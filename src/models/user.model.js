@@ -27,9 +27,8 @@ const userSchema = new Schema(
 		},
 		avatar: {
 			type: String,
-			required: [true, "the avatar is required"],
 		},
-		coverageImg: {
+		coverImg: {
 			type: String,
 		},
 		watchHistory: [{ type: Schema.Types.ObjectId, ref: "Video" }],
@@ -39,16 +38,16 @@ const userSchema = new Schema(
 		password: {
 			type: String,
 			required: [true, "the password is required"],
-            select:false
+            // select:false
 		},
 	},
 	{ timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-	if (!this.isModified("password"))return next()
+userSchema.pre("save", async function () {
+	if (!this.isModified("password"))return 
 	this.password = await bcrypt.hash(this.password, 10);
-	next();
+	
 });
 
 userSchema.methods.validatePassword = async function (password) {

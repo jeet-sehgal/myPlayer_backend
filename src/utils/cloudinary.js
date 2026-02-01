@@ -7,14 +7,17 @@ cloudinary.config({
 	api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async function (localPath) {
+const uploadOnCloudinary = async function (localPath,foldername,id) {
 	try {
+        console.log(cloudinary.config())
 		if (!localPath) return null;
 		const uploadResult = await cloudinary.uploader.upload(localPath, {
-			//    public_id: 'shoes',
-			// folder:"",
+			   public_id: `${id.toString()}`,
+			folder:`myPlayer/${foldername}`,
 			resource_type: "auto",
+            overwrite:true,
 		});
+        console.log("dekho bhai",uploadResult)
 		fs.unlinkSync(localPath);
 		return uploadResult;
 	} catch (error) {
