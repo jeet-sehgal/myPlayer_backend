@@ -9,7 +9,7 @@ cloudinary.config({
 
 const uploadOnCloudinary = async function (localPath,foldername,id) {
 	try {
-        console.log(cloudinary.config())
+        // console.log(cloudinary.config())
 		if (!localPath) return null;
 		const uploadResult = await cloudinary.uploader.upload(localPath, {
 			   public_id: `${id.toString()}`,
@@ -17,7 +17,7 @@ const uploadOnCloudinary = async function (localPath,foldername,id) {
 			resource_type: "auto",
             overwrite:true,
 		});
-        console.log("dekho bhai",uploadResult)
+        // console.log("dekho bhai",uploadResult)
 		fs.unlinkSync(localPath);
 		return uploadResult;
 	} catch (error) {

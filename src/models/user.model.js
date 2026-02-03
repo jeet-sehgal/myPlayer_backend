@@ -38,7 +38,6 @@ const userSchema = new Schema(
 		password: {
 			type: String,
 			required: [true, "the password is required"],
-            // select:false
 		},
 	},
 	{ timestamps: true }
@@ -51,7 +50,7 @@ userSchema.pre("save", async function () {
 });
 
 userSchema.methods.validatePassword = async function (password) {
-	return await bcrypt.compare(password, this.password);
+	return await bcrypt.compare(password.toString(), this.password);
 };
 
 userSchema.methods.generateAccessToken = function () {
@@ -77,5 +76,14 @@ userSchema.methods.generateRefreshToken = function () {
 		}
 	);
 };
+
+userSchema.methods.toJSON=function(){
+	const user=this.toObject()
+	delete user.password
+	delete user.__v
+	delete user.refreshToken
+
+	return user
+}
 
 export const User = mongoose.model("User", userSchema);
