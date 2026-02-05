@@ -140,7 +140,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-	console.log("yaha aa gya hu mai");
+	// console.log("yaha aa gya hu mai");
 	await User.findByIdAndUpdate(req.user._id, {
 		$unset: {
 			refreshToken: 1,
@@ -201,7 +201,30 @@ const refreshJWT = asyncHandler(async (req, res) => {
 });
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-    
+	const { oldPassword, newPassword } = req.body;
+
+	if (!oldPassword) {
+		throw new ApiError(400, "the old password is required ");
+	}
+	if (!newPassword) {
+		throw new ApiError(400, "the new password is required ");
+	}
+
+	const isPasswordCorrect = await req.user.validatePassword(oldPassword);
+
+	if (!isPasswordCorrect) {
+		throw new ApiError(400, "Invalid user password");
+	}
+
+	req.user.password = newPassword;
+	await req.user.save({ validateBeforeSave: false });
+
+	res.status(200).json(new ApiResponse({}, "password updated successfully"));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    res.status(200)
+    .json(req.user,"the user is valid till now")
 });
 
 export {
@@ -210,4 +233,5 @@ export {
 	logoutUser,
 	refreshJWT,
 	changeCurrentPassword,
+    getCurrentUser,
 };
