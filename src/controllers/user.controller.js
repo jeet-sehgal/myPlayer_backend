@@ -223,8 +223,93 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    res.status(200)
-    .json(req.user,"the user is valid till now")
+	res.status(200).json(req.user, "the user is valid till now");
+});
+
+const updateDetails = asyncHandler(async (req, res) => {
+	const { username, fullName, email } = req.body;
+
+	if (!username && !email && !fullName) {
+		throw new ApiError(400, "you have not provided any field to update");
+	}
+
+	if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+		throw new ApiError(422, "Invalid email format");
+	}
+	if (username && !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+		throw new ApiError(
+			422,
+			"Username must be 3–20 characters and contain only letters, numbers, or underscore"
+		);
+	}
+
+	// const existingUserEmail = email?await User.findOne({email:email.toLowerCase()}):""
+	// if(existingUserEmail){
+	//     throw new ApiError(409,"email is already occupied")
+	// }
+
+	// const existingUsername = username?await User.findOne({username:username.toLowerCase()}):""
+	// if(existingUsername){
+	//     throw new ApiError(409,"username is already occupied")
+	// }
+
+	if (username) {
+		req.user.username = username;
+	}
+	if (email) {
+		req.user.email = email;
+	}
+	if (fullName) {
+		req.user.fullName = fullName;
+	}
+
+	await req.user.save();
+
+	res
+		.status(200)
+		.json(new ApiResponse(req.user, "the user fields are required"));
+});
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+	const avatar = req.file;
+	if (!avatar) {
+		throw new ApiError(400, "file is required to upload");
+	}
+
+	const uploadedFile = await uploadOnCloudinary(
+		avatar.path,
+		avatar.fieldname,
+		req.user._id
+	);
+	if (!uploadedFile) {
+		throw new ApiError(400, "error occured during uploading of the file");
+	}
+
+	req.user.avatar = uploadedFile.url;
+	await req.user.save();
+
+	res.status(200).json(req.user, "the avatar file updated successfully");
+});
+
+const updateUserCoverImg = asyncHandler(async (req, res) => {
+	const coverImg = req.file;
+	if (!coverImg) {
+		throw new ApiError(400, "file is required to upload");
+	}
+
+	const uploadedFile = await uploadOnCloudinary(
+		coverImg.path,
+		coverImg.fieldname,
+		req.user._id
+	);
+	if (!uploadedFile) {
+		throw new ApiError(400, "error occured during uploading of the file");
+	}
+
+	req.user.coverImg = uploadedFile.url;
+	await req.user.save();
+
+	res.status(200).json(req.user, "the coverImg file updated successfully");
 });
 
 export {
@@ -233,5 +318,8 @@ export {
 	logoutUser,
 	refreshJWT,
 	changeCurrentPassword,
-    getCurrentUser,
+	getCurrentUser,
+	updateDetails,
+	updateUserAvatar,
+	updateUserCoverImg,
 };
